@@ -1,0 +1,181 @@
+.app {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+h1 {
+  color: #fff;
+  margin-bottom: 2rem;
+  font-size: 3rem;
+}
+
+.menu {
+  margin-bottom: 2rem;
+}
+
+.mode-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  margin: 0 10px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.mode-btn:hover {
+  background-color: #45a049;
+}
+
+.mode-btn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.mode-btn:disabled:hover {
+  background-color: #4CAF50;
+}
+
+.player-indicators {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  gap: 20px;
+}
+
+.player-btn {
+  flex: 1;
+  padding: 10px 20px;
+  font-size: 14px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  cursor: default;
+}
+
+.player-btn.active {
+  background-color: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
+.player-btn.waiting {
+  background-color: #f5f5f5;
+  color: #666;
+  border-color: #ddd;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 120px);
+  grid-template-rows: repeat(3, 120px);
+  margin: 2rem auto;
+  border: none;
+}
+
+.row {
+  display: contents;
+}
+
+.cell {
+  background-color: transparent;
+  border: 2px solid #fff;
+  border-radius: 0;
+  font-size: 48px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  color: #fff;
+  outline: none;
+}
+
+.cell:focus {
+  outline: none;
+}
+
+.cell:hover {
+  border-color: #fff !important;
+}
+
+.cell:focus,
+.cell:focus-visible {
+  outline: none !important;
+  border-color: #fff !important;
+}
+
+/* Create classic tic-tac-toe grid by removing outer borders */
+.cell.top-row {
+  border-top: none;
+}
+
+.cell.bottom-row {
+  border-bottom: none;
+}
+
+.cell.left-col {
+  border-left: none;
+}
+
+.cell.right-col {
+  border-right: none;
+}
+
+.cell:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.cell:disabled {
+  cursor: not-allowed;
+}
+
+.game-status {
+  margin-top: 2rem;
+}
+
+.game-status h2 {
+  color: #4CAF50;
+  margin-bottom: 1rem;
+}
+
+.game-status p {
+  color: #666;
+  margin-bottom: 1rem;
+  text-transform: capitalize;
+}
+
+.reset-btn, .menu-btn {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin: 0 5px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.reset-btn:hover, .menu-btn:hover {
+  background-color: #1976D2;
+}
+
+.menu-btn {
+  background-color: #FF9800;
+}
+
+.menu-btn:hover {
+  background-color: #F57C00;
+}
