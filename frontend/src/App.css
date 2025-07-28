@@ -81,6 +81,7 @@ h1 {
   grid-template-rows: repeat(3, 120px);
   margin: 2rem auto;
   border: none;
+  position: relative;
 }
 
 .row {
@@ -178,4 +179,85 @@ h1 {
 
 .menu-btn:hover {
   background-color: #F57C00;
+}
+
+/* Winning lines */
+.winning-line {
+  position: absolute;
+  background-color: #ff4444;
+  z-index: 10;
+  opacity: 0;
+  animation: drawLine 0.5s ease-in-out forwards;
+}
+
+@keyframes drawLine {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Horizontal lines (rows) */
+.winning-line.top-row {
+  top: 60px;
+  left: 0;
+  width: 360px;
+  height: 4px;
+}
+
+.winning-line.middle-row {
+  top: 180px;
+  left: 0;
+  width: 360px;
+  height: 4px;
+}
+
+.winning-line.bottom-row {
+  top: 300px;
+  left: 0;
+  width: 360px;
+  height: 4px;
+}
+
+/* Vertical lines (columns) */
+.winning-line.left-column {
+  top: 0;
+  left: 60px;
+  width: 4px;
+  height: 360px;
+}
+
+.winning-line.middle-column {
+  top: 0;
+  left: 180px;
+  width: 4px;
+  height: 360px;
+}
+
+.winning-line.right-column {
+  top: 0;
+  left: 300px;
+  width: 4px;
+  height: 360px;
+}
+
+/* Diagonal lines */
+.winning-line.top-left-bottom-right-diagonal {
+  top: 0;
+  left: 0;
+  width: 360px;
+  height: 360px;
+  background: linear-gradient(45deg, transparent calc(50% - 2px), #ff4444 calc(50% - 2px), #ff4444 calc(50% + 2px), transparent calc(50% + 2px));
+}
+
+.winning-line.top-right-bottom-left-diagonal {
+  top: 0;
+  left: 0;
+  width: 360px;
+  height: 360px;
+  background: linear-gradient(135deg, transparent calc(50% - 2px), #ff4444 calc(50% - 2px), #ff4444 calc(50% + 2px), transparent calc(50% + 2px));
 }

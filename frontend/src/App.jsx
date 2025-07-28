@@ -11,6 +11,7 @@ function App() {
   const [currentPlayer, setCurrentPlayer] = useState(1); // 1 for X, 2 for O
   const [gameStatus, setGameStatus] = useState("ongoing"); // 'ongoing', 'winner', 'tie'
   const [winner, setWinner] = useState(null);
+  const [winningCondition, setWinningCondition] = useState(null);
 
   const resetGame = () => {
     setBoard([
@@ -21,6 +22,7 @@ function App() {
     setCurrentPlayer(1);
     setGameStatus("ongoing");
     setWinner(null);
+    setWinningCondition(null);
   };
 
   const startPlayerVsPlayer = () => {
@@ -57,6 +59,7 @@ function App() {
       if (data.status === "winner") {
         setGameStatus("winner");
         setWinner(data.winner);
+        setWinningCondition(data.winning_condition);
       } else if (data.status === "tie") {
         setGameStatus("tie");
       } else {
@@ -200,6 +203,27 @@ function App() {
     );
   };
 
+  const renderWinningLine = () => {
+    if (!winningCondition) return null;
+    
+    // Map backend winning condition names to CSS class names
+    const lineClassMap = {
+      'top_row': 'top-row',
+      'middle_row': 'middle-row', 
+      'bottom_row': 'bottom-row',
+      'left_column': 'left-column',
+      'middle_column': 'middle-column',
+      'right_column': 'right-column',
+      'top_left_bottom_right_diagonal': 'top-left-bottom-right-diagonal',
+      'top_right_bottom_left_diagonal': 'top-right-bottom-left-diagonal'
+    };
+    
+    const lineClass = lineClassMap[winningCondition];
+    if (!lineClass) return null;
+    
+    return <div className={`winning-line ${lineClass}`}></div>;
+  };
+
   const renderBoard = () => {
     return (
       <div className="board">
@@ -208,6 +232,7 @@ function App() {
             {row.map((_, colIndex) => renderCell(rowIndex, colIndex))}
           </div>
         ))}
+        {renderWinningLine()}
       </div>
     );
   };
