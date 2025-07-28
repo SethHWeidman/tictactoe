@@ -67,12 +67,39 @@ function App() {
     }
   };
 
+  const getComputerMove = async (board) => {
+    try {
+      const response = await fetch("http://127.0.0.1:5001/computer_move", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ board: board }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get computer move");
+      }
+
+      const data = await response.json();
+      return { row: data.row, col: data.col };
+    } catch (error) {
+      console.error("Error getting computer move:", error);
+      return null;
+    }
+  };
+
   const makeMove = async (row, col) => {
     if (
       board[row][col] !== "" ||
       gameStatus !== "ongoing" ||
       gameMode === null
     ) {
+      return;
+    }
+
+    // In computer mode, only allow human moves when it's player 1's turn
+    if (gameMode === "computer" && currentPlayer !== 1) {
       return;
     }
 
@@ -87,7 +114,63 @@ function App() {
 
     setBoard(newBoard);
     await checkGameState(newBoard);
-    setCurrentPlayer(currentPlayer === 1 ? 2 : 1);
+
+    // If game is over, don't continue
+    const gameState = await checkGameStateSync(newBoard);
+    if (gameState.status !== "ongoing") {
+      return;
+    }
+
+    // Switch to next player
+    const nextPlayer = currentPlayer === 1 ? 2 : 1;
+    setCurrentPlayer(nextPlayer);
+
+    // If it's computer mode and now it's the computer's turn (player 2)
+    if (gameMode === "computer" && nextPlayer === 2) {
+      // Small delay to make the computer move feel more natural
+      setTimeout(async () => {
+        const computerMove = await getComputerMove(newBoard);
+        if (computerMove && gameStatus === "ongoing") {
+          await makeComputerMove(computerMove.row, computerMove.col, newBoard);
+        }
+      }, 500);
+    }
+  };
+
+  const checkGameStateSync = async (board) => {
+    try {
+      const response = await fetch("http://127.0.0.1:5001/check_game_state", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ board: board }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to check game state");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error checking game state:", error);
+      return { status: "ongoing" };
+    }
+  };
+
+  const makeComputerMove = async (row, col, currentBoard) => {
+    const newBoard = currentBoard.map((r, rowIndex) =>
+      r.map((cell, colIndex) => {
+        if (rowIndex === row && colIndex === col) {
+          return "O"; // Computer is always O
+        }
+        return cell;
+      })
+    );
+
+    setBoard(newBoard);
+    await checkGameState(newBoard);
+    setCurrentPlayer(1); // Switch back to human player
   };
 
   const renderCell = (row, col) => {
@@ -98,12 +181,19 @@ function App() {
     if (col === 0) cellClasses += " left-col";
     if (col === 2) cellClasses += " right-col";
 
+    // Disable clicks when game is not ongoing, no mode selected, or when it's
+    // computer's turn
+    const isDisabled =
+      gameStatus !== "ongoing" ||
+      gameMode === null ||
+      (gameMode === "computer" && currentPlayer === 2);
+
     return (
       <button
         key={`${row}-${col}`}
         className={cellClasses}
         onClick={() => makeMove(row, col)}
-        disabled={gameStatus !== "ongoing" || gameMode === null}
+        disabled={isDisabled}
       >
         {board[row][col]}
       </button>
@@ -124,10 +214,17 @@ function App() {
 
   const renderGameStatus = () => {
     if (gameStatus === "winner") {
-      const playerName = winner === "X" ? "Player 1" : "Player 2";
+      let playerName;
+      if (gameMode === "computer") {
+        playerName = winner === "X" ? "You" : "Computer";
+      } else {
+        playerName = winner === "X" ? "Player 1" : "Player 2";
+      }
       return (
         <div className="game-status">
-          <h2>{playerName} wins!</h2>
+          <h2>
+            {playerName} win{playerName === "You" ? "" : "s"}!
+          </h2>
           <button onClick={resetGame} className="reset-btn">
             Play Again
           </button>
@@ -153,26 +250,55 @@ function App() {
   };
 
   const renderPlayerIndicators = () => {
-    if (gameMode !== "player" || gameStatus !== "ongoing") {
+    if (gameStatus !== "ongoing") {
       return null;
     }
 
-    return (
-      <div className="player-indicators">
-        <button
-          className={`player-btn ${currentPlayer === 1 ? "active" : "waiting"}`}
-          disabled
-        >
-          {currentPlayer === 1 ? "Player 1, your turn" : "Wait for Player 1"}
-        </button>
-        <button
-          className={`player-btn ${currentPlayer === 2 ? "active" : "waiting"}`}
-          disabled
-        >
-          {currentPlayer === 2 ? "Player 2, your turn" : "Wait for Player 2"}
-        </button>
-      </div>
-    );
+    if (gameMode === "player") {
+      return (
+        <div className="player-indicators">
+          <button
+            className={`player-btn ${
+              currentPlayer === 1 ? "active" : "waiting"
+            }`}
+            disabled
+          >
+            {currentPlayer === 1 ? "Player 1, your turn" : "Wait for Player 1"}
+          </button>
+          <button
+            className={`player-btn ${
+              currentPlayer === 2 ? "active" : "waiting"
+            }`}
+            disabled
+          >
+            {currentPlayer === 2 ? "Player 2, your turn" : "Wait for Player 2"}
+          </button>
+        </div>
+      );
+    } else if (gameMode === "computer") {
+      return (
+        <div className="player-indicators">
+          <button
+            className={`player-btn ${
+              currentPlayer === 1 ? "active" : "waiting"
+            }`}
+            disabled
+          >
+            {currentPlayer === 1 ? "Your turn" : "Wait for your turn"}
+          </button>
+          <button
+            className={`player-btn ${
+              currentPlayer === 2 ? "active" : "waiting"
+            }`}
+            disabled
+          >
+            {currentPlayer === 2 ? "Computer's turn" : "Wait for computer"}
+          </button>
+        </div>
+      );
+    }
+
+    return null;
   };
 
   if (gameMode === null) {
@@ -183,7 +309,7 @@ function App() {
           <button onClick={startPlayerVsPlayer} className="mode-btn">
             Play against another player
           </button>
-          <button onClick={startPlayerVsComputer} className="mode-btn" disabled>
+          <button onClick={startPlayerVsComputer} className="mode-btn">
             Play against the computer
           </button>
         </div>
